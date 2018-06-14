@@ -1,0 +1,18 @@
+# Java class files
+*.class
+# Files for the Dalvik VM
+*.dex
+#Gradle Files
+local.properties
+.gradle
+# generated files
+build/
+bin/
+gen/
+out/
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea/
+.DS_Store
