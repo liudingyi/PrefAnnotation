@@ -20,6 +20,6 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation project(':annotations')
-    annotationProcessor project(':processors')
+    implementation 'com.pref:annotations:1.0.1'
+    annotationProcessor 'com.pref:processors:1.0.1'
 }
