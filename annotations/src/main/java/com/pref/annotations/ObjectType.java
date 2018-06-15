@@ -5,10 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Retention(RetentionPolicy.CLASS)
-@Target(ElementType.TYPE)
-public @interface SharePref {
-    String name() default "";
-
-    String superPackage() default "";
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.FIELD)
+public @interface ObjectType {
+    String value();
 }

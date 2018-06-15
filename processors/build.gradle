@@ -17,7 +17,9 @@ uploadArchives {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.squareup:javapoet:1.9.0'
-    implementation 'com.pref:annotations:1.0.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation project(':annotations')
+//    implementation 'com.pref:annotations:1.0.1'
 }
 
 sourceCompatibility = "1.7"

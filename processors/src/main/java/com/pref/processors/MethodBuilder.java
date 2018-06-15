@@ -1,5 +1,6 @@
 package com.pref.processors;
 
+import com.google.gson.Gson;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 
@@ -8,7 +9,7 @@ import javax.lang.model.element.Modifier;
 public class MethodBuilder {
 
     public static final String PrefPackageName = "com.pref";
-    public static final String PrefClassName = "Pref";
+    public static String PrefClassName = "Pref";
     public static String PrefName = "pref_data";
 
     private static final ClassName Context = ClassName.get("android.content", "Context");
@@ -55,7 +56,7 @@ public class MethodBuilder {
                 .returns(int.class)
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", preference)
-                .addStatement("return $N.getInt($S,$L)", preference, key, defaultInt)
+                .addStatement("return $N.getInt($S, $L)", preference, key, defaultInt)
                 .endControlFlow()
                 .addStatement("return $L", defaultInt)
                 .endControlFlow()
@@ -73,7 +74,7 @@ public class MethodBuilder {
                 .addParameter(int.class, "value")
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", editor)
-                .addStatement("$N.putInt($S,value).apply()", editor, key)
+                .addStatement("$N.putInt($S, value).apply()", editor, key)
                 .endControlFlow()
                 .endControlFlow()
                 .build();
@@ -91,7 +92,7 @@ public class MethodBuilder {
                 .returns(float.class)
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", preference)
-                .addStatement("return $N.getFloat($S,$L)", preference, key, defaultFloat + "f")
+                .addStatement("return $N.getFloat($S, $L)", preference, key, defaultFloat + "f")
                 .endControlFlow()
                 .addStatement("return $L", defaultFloat + "f")
                 .endControlFlow()
@@ -109,7 +110,7 @@ public class MethodBuilder {
                 .addParameter(float.class, "value")
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", editor)
-                .addStatement("$N.putFloat($S,value).apply()", editor, key)
+                .addStatement("$N.putFloat($S, value).apply()", editor, key)
                 .endControlFlow()
                 .endControlFlow()
                 .build();
@@ -128,7 +129,7 @@ public class MethodBuilder {
                 .returns(long.class)
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", preference)
-                .addStatement("return $N.getLong($S,$L)", preference, key, defaultLong)
+                .addStatement("return $N.getLong($S, $L)", preference, key, defaultLong)
                 .endControlFlow()
                 .addStatement("return $L", defaultLong)
                 .endControlFlow()
@@ -146,7 +147,7 @@ public class MethodBuilder {
                 .addParameter(long.class, "value")
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", editor)
-                .addStatement("$N.putLong($S,value).apply()", editor, key)
+                .addStatement("$N.putLong($S, value).apply()", editor, key)
                 .endControlFlow()
                 .endControlFlow()
                 .build();
@@ -164,7 +165,7 @@ public class MethodBuilder {
                 .returns(boolean.class)
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", preference)
-                .addStatement("return $N.getBoolean($S,$L)", preference, key, defaultBoolean)
+                .addStatement("return $N.getBoolean($S, $L)", preference, key, defaultBoolean)
                 .endControlFlow()
                 .addStatement("return $L", defaultBoolean)
                 .endControlFlow()
@@ -182,7 +183,7 @@ public class MethodBuilder {
                 .addParameter(boolean.class, "value")
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", editor)
-                .addStatement("$N.putBoolean($S,value).apply()", editor, key)
+                .addStatement("$N.putBoolean($S, value).apply()", editor, key)
                 .endControlFlow()
                 .endControlFlow()
                 .build();
@@ -200,7 +201,7 @@ public class MethodBuilder {
                 .returns(String.class)
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", preference)
-                .addStatement("return $N.getString($S,$S)", preference, key, defaultString)
+                .addStatement("return $N.getString($S, $S)", preference, key, defaultString)
                 .endControlFlow()
                 .addStatement("return $S", defaultString)
                 .endControlFlow()
@@ -217,8 +218,55 @@ public class MethodBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(String.class, "value")
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
-                .beginControlFlow("if($N != null)", editor)
-                .addStatement("$N.putString($S,value).apply()", editor, key)
+                .beginControlFlow("if($N != null && value != null)", editor)
+                .addStatement("$N.putString($S, value).apply()", editor, key)
+                .endControlFlow()
+                .endControlFlow()
+                .build();
+    }
+
+    /**
+     * @param fieldName  String
+     * @param key        String
+     * @param objectType String
+     * @return MethodSpec
+     */
+    public static MethodSpec createGetObject(String fieldName, String key, String objectType) {
+        int index = objectType.lastIndexOf(".");
+        String package_name = objectType.substring(0, index);
+        String class_name = objectType.substring(index + 1);
+        ClassName obj = ClassName.get(package_name, class_name);
+        return MethodSpec.methodBuilder("get" + upperCase(fieldName))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(obj)
+                .beginControlFlow("synchronized($N.class)", PrefClassName)
+                .beginControlFlow("if($N != null)", preference)
+                .addStatement("String json = $N.getString($S, $S)", preference, key, "")
+                .addStatement("return new $T().fromJson(json, $N.class)", Gson.class, obj.simpleName())
+                .endControlFlow()
+                .addStatement("return null")
+                .endControlFlow()
+                .build();
+    }
+
+    /**
+     * @param fieldName  String
+     * @param key        String
+     * @param objectType String
+     * @return MethodSpec
+     */
+    public static MethodSpec createPutObject(String fieldName, String key, String objectType) {
+        int index = objectType.lastIndexOf(".");
+        String package_name = objectType.substring(0, index);
+        String class_name = objectType.substring(index + 1);
+        ClassName obj = ClassName.get(package_name, class_name);
+        return MethodSpec.methodBuilder("put" + upperCase(fieldName))
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(obj, class_name.toLowerCase())
+                .beginControlFlow("synchronized($N.class)", PrefClassName)
+                .beginControlFlow("if($N != null && $N != null)", editor, class_name.toLowerCase())
+                .addStatement("String json = new $T().toJson($N)", Gson.class, class_name.toLowerCase())
+                .addStatement("$N.putString($S, json).apply()", editor, key)
                 .endControlFlow()
                 .endControlFlow()
                 .build();

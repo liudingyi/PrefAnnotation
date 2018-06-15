@@ -5,8 +5,10 @@ import com.pref.annotations.DefaultFloat;
 import com.pref.annotations.DefaultInt;
 import com.pref.annotations.DefaultLong;
 import com.pref.annotations.DefaultString;
+import com.pref.annotations.ObjectType;
 import com.pref.annotations.PrefKey;
 import com.pref.annotations.SharePref;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
@@ -25,7 +27,16 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
-@SupportedAnnotationTypes({"com.pref.annotations.PrefKey"})
+@SupportedAnnotationTypes({
+        "com.pref.annotations.SharePref",
+        "com.pref.annotations.PrefKey",
+        "com.pref.annotations.DefaultInt",
+        "com.pref.annotations.DefaultFloat",
+        "com.pref.annotations.DefaultLong",
+        "com.pref.annotations.DefaultBoolean",
+        "com.pref.annotations.DefaultString",
+        "com.pref.annotations.ObjectType"
+})
 public class PrefProcessor extends AbstractProcessor {
 
     private Filer filer;
@@ -38,22 +49,37 @@ public class PrefProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) throws PrefrenceUniqueException {
+        ClassName superClass = null;
         if (roundEnvironment.getElementsAnnotatedWith(SharePref.class).size() > 1) {
             throw new PrefrenceUniqueException("The type of @SharePref annotation must be unique.");
         } else {
             if (roundEnvironment.getElementsAnnotatedWith(SharePref.class).iterator().hasNext()) {
                 Element element = roundEnvironment.getElementsAnnotatedWith(SharePref.class).iterator().next();
-                MethodBuilder.PrefName = element.getAnnotation(SharePref.class).name();
+                if (!element.getAnnotation(SharePref.class).name().isEmpty()) {
+                    MethodBuilder.PrefName = element.getAnnotation(SharePref.class).name();
+                }
+                if (!element.getAnnotation(SharePref.class).superPackage().isEmpty()) {
+                    String superPackage = element.getAnnotation(SharePref.class).superPackage();
+                    String superClassName = element.getSimpleName().toString();
+                    superClass = ClassName.get(superPackage, superClassName);
+                }
+                MethodBuilder.PrefClassName = element.getSimpleName() + "_";
             }
         }
-        TypeSpec.Builder builder = TypeSpec.classBuilder(MethodBuilder.PrefClassName)
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addField(MethodBuilder.SharedPreferences, MethodBuilder.preference, Modifier.PRIVATE)
-                .addField(MethodBuilder.Editor, MethodBuilder.editor, Modifier.PRIVATE)
-                .addMethod(MethodBuilder.createConstructor());
+        TypeSpec.Builder builder = TypeSpec.classBuilder(MethodBuilder.PrefClassName);
+        if (superClass != null) {
+            builder.superclass(superClass.withoutAnnotations());
+        }
+        builder.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
+        builder.addField(MethodBuilder.SharedPreferences, MethodBuilder.preference, Modifier.PRIVATE);
+        builder.addField(MethodBuilder.Editor, MethodBuilder.editor, Modifier.PRIVATE);
+        builder.addMethod(MethodBuilder.createConstructor());
         for (Element element : roundEnvironment.getElementsAnnotatedWith(PrefKey.class)) {
             String fieldName = element.getSimpleName().toString();
             String key = element.getAnnotation(PrefKey.class).key();
+            if (key.isEmpty()) {
+                key = fieldName.toLowerCase();
+            }
             switch (element.asType().getKind()) {
                 case INT:
                     int defaultInt = 0;
@@ -89,11 +115,19 @@ public class PrefProcessor extends AbstractProcessor {
                     break;
                 case DECLARED:
                     String defaultString = "";
+                    String objectType = null;
                     if (element.getAnnotation(DefaultString.class) != null) {
                         defaultString = element.getAnnotation(DefaultString.class).value();
+                    } else if (element.getAnnotation(ObjectType.class) != null) {
+                        objectType = element.getAnnotation(ObjectType.class).value();
                     }
-                    builder.addMethod(MethodBuilder.createGetString(fieldName, key, defaultString));
-                    builder.addMethod(MethodBuilder.createPutString(fieldName, key));
+                    if (objectType == null) {
+                        builder.addMethod(MethodBuilder.createGetString(fieldName, key, defaultString));
+                        builder.addMethod(MethodBuilder.createPutString(fieldName, key));
+                    } else {
+                        builder.addMethod(MethodBuilder.createGetObject(fieldName, key, objectType));
+                        builder.addMethod(MethodBuilder.createPutObject(fieldName, key, objectType));
+                    }
                     break;
                 default:
                     break;
