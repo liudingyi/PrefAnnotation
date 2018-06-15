@@ -10,6 +10,7 @@ public class MethodBuilder {
 
     public static final String PrefPackageName = "com.pref";
     public static String PrefClassName = "Pref";
+    public static final String PrefInstanceName = "instance";
     public static String PrefName = "pref_data";
 
     private static final ClassName Context = ClassName.get("android.content", "Context");
@@ -37,10 +38,25 @@ public class MethodBuilder {
      */
     public static MethodSpec createConstructor() {
         return MethodSpec.constructorBuilder()
-                .addModifiers(Modifier.PUBLIC)
+                .addModifiers(Modifier.PRIVATE)
                 .addParameter(Context, "context")
                 .addStatement("$N = context.getSharedPreferences($S,$L)", preference, PrefName, MODE_PRIVATE)
                 .addStatement("$N = $N.edit()", editor, preference)
+                .build();
+    }
+
+    /**
+     * @return MethodSpec
+     */
+    public static MethodSpec createInstance() {
+        return MethodSpec.methodBuilder("getInstance")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(ClassName.get(PrefPackageName, PrefClassName))
+                .addParameter(Context, "context")
+                .beginControlFlow("if($N == null)", PrefInstanceName)
+                .addStatement("$N = new $N(context)", PrefInstanceName, PrefClassName)
+                .endControlFlow()
+                .addStatement("return $N", PrefInstanceName)
                 .build();
     }
 
@@ -59,6 +75,22 @@ public class MethodBuilder {
                 .addStatement("return $N.getInt($S, $L)", preference, key, defaultInt)
                 .endControlFlow()
                 .addStatement("return $L", defaultInt)
+                .endControlFlow()
+                .build();
+    }
+
+    /**
+     * @param fieldName String
+     * @param key       String
+     * @return MethodSpec
+     */
+    public static MethodSpec createRemove(String fieldName, String key) {
+        return MethodSpec.methodBuilder("remove" + upperCase(fieldName))
+                .addModifiers(Modifier.PUBLIC)
+                .beginControlFlow("synchronized($N.class)", PrefClassName)
+                .beginControlFlow("if($N != null)", editor)
+                .addStatement("$N.remove($S).apply()", editor, key)
+                .endControlFlow()
                 .endControlFlow()
                 .build();
     }
@@ -242,6 +274,9 @@ public class MethodBuilder {
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", preference)
                 .addStatement("String json = $N.getString($S, $S)", preference, key, "")
+                .beginControlFlow("if(json.isEmpty())", preference)
+                .addStatement("return null")
+                .endControlFlow()
                 .addStatement("return new $T().fromJson(json, $N.class)", Gson.class, obj.simpleName())
                 .endControlFlow()
                 .addStatement("return null")
@@ -264,8 +299,11 @@ public class MethodBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(obj, class_name.toLowerCase())
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
-                .beginControlFlow("if($N != null && $N != null)", editor, class_name.toLowerCase())
-                .addStatement("String json = new $T().toJson($N)", Gson.class, class_name.toLowerCase())
+                .beginControlFlow("if($N != null)", editor)
+                .addStatement("String json = \"\"")
+                .beginControlFlow("if($N != null)", class_name.toLowerCase())
+                .addStatement("json = new $T().toJson($N)", Gson.class, class_name.toLowerCase())
+                .endControlFlow()
                 .addStatement("$N.putString($S, json).apply()", editor, key)
                 .endControlFlow()
                 .endControlFlow()

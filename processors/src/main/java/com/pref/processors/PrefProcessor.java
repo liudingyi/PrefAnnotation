@@ -70,16 +70,17 @@ public class PrefProcessor extends AbstractProcessor {
         if (superClass != null) {
             builder.superclass(superClass.withoutAnnotations());
         }
-        builder.addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-        builder.addField(MethodBuilder.SharedPreferences, MethodBuilder.preference, Modifier.PRIVATE);
-        builder.addField(MethodBuilder.Editor, MethodBuilder.editor, Modifier.PRIVATE);
-        builder.addMethod(MethodBuilder.createConstructor());
+        builder.addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addField(ClassName.get(MethodBuilder.PrefPackageName, MethodBuilder.PrefClassName), MethodBuilder.PrefInstanceName, Modifier.PRIVATE, Modifier.STATIC)
+                .addField(MethodBuilder.SharedPreferences, MethodBuilder.preference, Modifier.PRIVATE, Modifier.STATIC)
+                .addField(MethodBuilder.Editor, MethodBuilder.editor, Modifier.PRIVATE, Modifier.STATIC)
+                .addMethod(MethodBuilder.createConstructor())
+                .addMethod(MethodBuilder.createInstance());
         for (Element element : roundEnvironment.getElementsAnnotatedWith(PrefKey.class)) {
             String fieldName = element.getSimpleName().toString();
             String key = element.getAnnotation(PrefKey.class).key();
-            if (key.isEmpty()) {
-                key = fieldName.toLowerCase();
-            }
+            key = key.isEmpty() ? fieldName.toLowerCase() : key;
+            builder.addMethod(MethodBuilder.createRemove(fieldName, key));
             switch (element.asType().getKind()) {
                 case INT:
                     int defaultInt = 0;
