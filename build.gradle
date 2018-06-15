@@ -20,8 +20,6 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
-        //引用本地maven
-        maven { url 'D://Android//maven/.m2/repository' }
     }
 }
 
