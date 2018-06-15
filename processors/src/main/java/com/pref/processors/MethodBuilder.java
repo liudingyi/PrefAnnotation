@@ -9,7 +9,7 @@ public class MethodBuilder {
 
     public static final String PrefPackageName = "com.pref";
     public static final String PrefClassName = "Pref";
-    private static final String PrefName = "pref_data";
+    public static String PrefName = "pref_data";
 
     private static final ClassName Context = ClassName.get("android.content", "Context");
     public static final ClassName SharedPreferences = ClassName.get("android.content", "SharedPreferences");

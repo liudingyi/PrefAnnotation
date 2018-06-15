@@ -6,6 +6,7 @@ import com.pref.annotations.DefaultInt;
 import com.pref.annotations.DefaultLong;
 import com.pref.annotations.DefaultString;
 import com.pref.annotations.PrefKey;
+import com.pref.annotations.SharePref;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
@@ -36,9 +37,16 @@ public class PrefProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-        String class_name = MethodBuilder.PrefClassName;
-        TypeSpec.Builder builder = TypeSpec.classBuilder(class_name)
+    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) throws PrefrenceUniqueException {
+        if (roundEnvironment.getElementsAnnotatedWith(SharePref.class).size() > 1) {
+            throw new PrefrenceUniqueException("The type of @SharePref annotation must be unique.");
+        } else {
+            if (roundEnvironment.getElementsAnnotatedWith(SharePref.class).iterator().hasNext()) {
+                Element element = roundEnvironment.getElementsAnnotatedWith(SharePref.class).iterator().next();
+                MethodBuilder.PrefName = element.getAnnotation(SharePref.class).name();
+            }
+        }
+        TypeSpec.Builder builder = TypeSpec.classBuilder(MethodBuilder.PrefClassName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addField(MethodBuilder.SharedPreferences, MethodBuilder.preference, Modifier.PRIVATE)
                 .addField(MethodBuilder.Editor, MethodBuilder.editor, Modifier.PRIVATE)
@@ -92,8 +100,7 @@ public class PrefProcessor extends AbstractProcessor {
             }
         }
         TypeSpec typeSpec = builder.build();
-        String package_name = MethodBuilder.PrefPackageName;
-        JavaFile javaFile = JavaFile.builder(package_name, typeSpec).build();
+        JavaFile javaFile = JavaFile.builder(MethodBuilder.PrefPackageName, typeSpec).build();
         try {
             javaFile.writeTo(filer);
         } catch (IOException e) {
