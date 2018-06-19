@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
+    buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.pref.annotation"
         minSdkVersion 15
@@ -18,9 +19,9 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation project(':annotations')
-    annotationProcessor project(':processors')
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.google.code.gson:gson:2.8.5'
+    compile project(':annotations')
+//    annotationProcessor project(':processors')
 }
