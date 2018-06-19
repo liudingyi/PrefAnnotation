@@ -1,25 +1,10 @@
 apply plugin: 'java-library'
-apply plugin: 'maven'
-
-uploadArchives {
-    repositories.mavenDeployer {
-        // 本地仓库路径
-        repository(url: "file://D://Android//maven/.m2/repository/")
-        // 唯一标识
-        pom.groupId = "com.pref"
-        // 项目名称
-        pom.artifactId = "processors"
-        // 版本号
-        pom.version = PA_VERSION_CODE
-    }
-}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.squareup:javapoet:1.9.0'
     implementation 'com.google.code.gson:gson:2.8.5'
-//    implementation project(':annotations')
-    implementation 'com.pref:annotations:1.0.1'
+    implementation project(':annotations')
 }
 
 sourceCompatibility = "1.7"
