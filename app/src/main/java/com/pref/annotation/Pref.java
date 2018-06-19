@@ -8,8 +8,4 @@ public class Pref {
     @PrefKey(key = "user_name")
     public String username;
 
-    @PrefKey(key = "order")
-    @ObjectType("com.pref.annotation.Order")
-    public Order order;
-
 }
