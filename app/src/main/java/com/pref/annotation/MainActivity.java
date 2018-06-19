@@ -12,6 +12,5 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Pref_ pref =  Pref_.getInstance(this);
-        pref.putOrder(new Order(1000));
     }
 }
