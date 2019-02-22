@@ -11,6 +11,6 @@ dependencies {
 targetCompatibility = '1.7'
 sourceCompatibility = '1.7'
 
-group = 'com.github.liudingyi.processors'
-version = LIBRARY_VERSION_CODE
+//group = 'com.github.liudingyi.processors'
+//version = LIBRARY_VERSION_CODE
 
