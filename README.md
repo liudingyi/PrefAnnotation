@@ -3,6 +3,13 @@
 
 [![](https://jitpack.io/v/liudingyi/PrefAnnotation.svg)](https://jitpack.io/#liudingyi/PrefAnnotation)
 
+
+### Gralde导入
+```
+    implementation 'com.github.liudingyi.PrefAnnotation:annotations:lastversion'
+    annotationProcessor 'com.github.liudingyi.PrefAnnotation:processors:lastversion'
+```
+
 ### 注解说明
 
 
@@ -120,9 +127,4 @@ public final class Pref_ extends Pref {
 
 ```
 
-### gralde 导入
-```
-    implementation 'com.github.liudingyi.PrefAnnotation:annotations:lastversion'
-    annotationProcessor 'com.github.liudingyi.PrefAnnotation:processors:lastversion'
-```
 
