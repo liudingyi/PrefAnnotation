@@ -17,8 +17,8 @@
 
     dependencies {
         ...
-        implementation 'com.github.liudingyi.PrefAnnotation:annotations:lastversion'
-        annotationProcessor 'com.github.liudingyi.PrefAnnotation:processors:lastversion'
+        implementation 'com.github.liudingyi.PrefAnnotation:annotations:@version'
+        annotationProcessor 'com.github.liudingyi.PrefAnnotation:processors:@version'
     }
 
 
