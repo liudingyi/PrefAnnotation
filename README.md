@@ -27,9 +27,9 @@
 
 注解名| 注解作用 | 注解属性
 ---|---|---
-@SharePref | 标记对应的preference数据类 | name:偏好名称<br>superPackage：所在包路径
+@SharePref | 标记对应的preference数据类 | name:偏好名称
 @PrefKey | 标记属性的key | key：属性的key
-@ObjectType | 标记属性对象类型 | value：完整的包名 例：<br>@PrefKey(key = "user_info")<br>@ObjectType(" com.ldy.data.UserInfo")<br>private UserInfo userInfo;
+@ObjectType | 标记属性对象类型（支持泛型对象）
 @DefaultInt | 标记默认的Int值 | value：默认值
 @DefaultFloat | 标记默认的Float值 | value：默认值
 @DefaultLong | 标记默认的Long值 | value：默认值
