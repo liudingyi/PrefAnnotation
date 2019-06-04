@@ -1,8 +1,11 @@
 package com.pref.processors;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.Modifier;
 
@@ -303,6 +306,81 @@ public class MethodBuilder {
                 .addStatement("String json = \"\"")
                 .beginControlFlow("if($N != null)", class_name.toLowerCase())
                 .addStatement("json = new $T().toJson($N)", Gson.class, class_name.toLowerCase())
+                .endControlFlow()
+                .addStatement("$N.putString($S, json).apply()", editor, key)
+                .endControlFlow()
+                .endControlFlow()
+                .build();
+    }
+
+    /**
+     * @param fieldName         String
+     * @param key               String
+     * @param genericObjectType String
+     * @return MethodSpec
+     */
+    public static MethodSpec createGetGenericObject(String fieldName, String key, String genericObjectType) {
+        int start = genericObjectType.lastIndexOf("<");
+        int end = genericObjectType.lastIndexOf(">");
+        //构建主类型
+        String mainPackagePath = genericObjectType.substring(0, start);
+        int mainIndex = mainPackagePath.lastIndexOf(".");
+        String mainPackageName = mainPackagePath.substring(0, mainIndex);
+        String mainClassName = mainPackagePath.substring(mainIndex + 1);
+        ClassName mainClass = ClassName.get(mainPackageName, mainClassName);
+        //构建泛型类型
+        String innerPackagePath = genericObjectType.substring(start + 1, end);
+        int innerIndex = innerPackagePath.lastIndexOf(".");
+        String innerPackageName = innerPackagePath.substring(0, innerIndex);
+        String innerClassName = innerPackagePath.substring(innerIndex + 1);
+        ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
+        TypeName obj = ParameterizedTypeName.get(mainClass, innerClass);
+        return MethodSpec.methodBuilder("get" + upperCase(fieldName))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(obj)
+                .beginControlFlow("synchronized($N.class)", PrefClassName)
+                .beginControlFlow("if($N != null)", preference)
+                .addStatement("String json = $N.getString($S, $S)", preference, key, "")
+                .beginControlFlow("if(json.isEmpty())", preference)
+                .addStatement("return null")
+                .endControlFlow()
+                .addStatement("return new $T().fromJson(json, new $T<$T>() {}.getType())", Gson.class, TypeToken.class, obj)
+                .endControlFlow()
+                .addStatement("return null")
+                .endControlFlow()
+                .build();
+    }
+
+    /**
+     * @param fieldName         String
+     * @param key               String
+     * @param genericObjectType String
+     * @return MethodSpec
+     */
+    public static MethodSpec createPutGenericObject(String fieldName, String key, String genericObjectType) {
+        int start = genericObjectType.lastIndexOf("<");
+        int end = genericObjectType.lastIndexOf(">");
+        //构建主类型
+        String mainPackagePath = genericObjectType.substring(0, start);
+        int mainIndex = mainPackagePath.lastIndexOf(".");
+        String mainPackageName = mainPackagePath.substring(0, mainIndex);
+        String mainClassName = mainPackagePath.substring(mainIndex + 1);
+        ClassName mainClass = ClassName.get(mainPackageName, mainClassName);
+        //构建泛型类型
+        String innerPackagePath = genericObjectType.substring(start + 1, end);
+        int innerIndex = innerPackagePath.lastIndexOf(".");
+        String innerPackageName = innerPackagePath.substring(0, innerIndex);
+        String innerClassName = innerPackagePath.substring(innerIndex + 1);
+        ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
+        ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, innerClass);
+        return MethodSpec.methodBuilder("put" + upperCase(fieldName))
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(obj, fieldName.toLowerCase())
+                .beginControlFlow("synchronized($N.class)", PrefClassName)
+                .beginControlFlow("if($N != null)", editor)
+                .addStatement("String json = \"\"")
+                .beginControlFlow("if($N != null)", fieldName.toLowerCase())
+                .addStatement("json = new $T().toJson($N)", Gson.class, fieldName.toLowerCase())
                 .endControlFlow()
                 .addStatement("$N.putString($S, json).apply()", editor, key)
                 .endControlFlow()

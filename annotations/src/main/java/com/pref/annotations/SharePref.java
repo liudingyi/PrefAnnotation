@@ -9,6 +9,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface SharePref {
     String name() default "";
-
-    String superPackage() default "";
 }

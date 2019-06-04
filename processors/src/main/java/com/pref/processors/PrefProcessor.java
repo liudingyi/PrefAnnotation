@@ -10,6 +10,7 @@ import com.pref.annotations.PrefKey;
 import com.pref.annotations.SharePref;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
@@ -25,6 +26,9 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({
@@ -48,22 +52,24 @@ public class PrefProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) throws PrefrenceUniqueException {
+    public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) throws PreferenceProcessorsException {
         ClassName superClass = null;
         if (roundEnvironment.getElementsAnnotatedWith(SharePref.class).size() > 1) {
-            throw new PrefrenceUniqueException("The type of @SharePref annotation must be unique.");
+            throw new PreferenceProcessorsException("The type of @SharePref annotation must be unique.");
         } else {
             if (roundEnvironment.getElementsAnnotatedWith(SharePref.class).iterator().hasNext()) {
                 Element element = roundEnvironment.getElementsAnnotatedWith(SharePref.class).iterator().next();
                 if (!element.getAnnotation(SharePref.class).name().isEmpty()) {
                     MethodBuilder.PrefName = element.getAnnotation(SharePref.class).name();
+                    MethodBuilder.PrefClassName = element.getSimpleName() + "_";
+                    TypeElement typeElement = (TypeElement) element;
+                    String classNameString = typeElement.getQualifiedName().toString();
+                    superClass = ClassName.bestGuess(classNameString);
+                } else {
+                    throw new PreferenceProcessorsException("Preference name must be initialized.");
                 }
-                if (!element.getAnnotation(SharePref.class).superPackage().isEmpty()) {
-                    String superPackage = element.getAnnotation(SharePref.class).superPackage();
-                    String superClassName = element.getSimpleName().toString();
-                    superClass = ClassName.get(superPackage, superClassName);
-                }
-                MethodBuilder.PrefClassName = element.getSimpleName() + "_";
+//            } else {
+//                throw new PreferenceProcessorsException("The type of @SharePref annotation is empty.");
             }
         }
         TypeSpec.Builder builder = TypeSpec.classBuilder(MethodBuilder.PrefClassName);
@@ -117,17 +123,26 @@ public class PrefProcessor extends AbstractProcessor {
                 case DECLARED:
                     String defaultString = "";
                     String objectType = null;
+                    String genericObjectType = null;
                     if (element.getAnnotation(DefaultString.class) != null) {
                         defaultString = element.getAnnotation(DefaultString.class).value();
                     } else if (element.getAnnotation(ObjectType.class) != null) {
-                        objectType = element.getAnnotation(ObjectType.class).value();
+                        String type = element.asType().toString();
+                        if (type.contains("<") || type.contains(">")) {
+                            genericObjectType = type;
+                        } else {
+                            objectType = type;
+                        }
                     }
-                    if (objectType == null) {
-                        builder.addMethod(MethodBuilder.createGetString(fieldName, key, defaultString));
-                        builder.addMethod(MethodBuilder.createPutString(fieldName, key));
-                    } else {
+                    if (objectType != null) {
                         builder.addMethod(MethodBuilder.createGetObject(fieldName, key, objectType));
                         builder.addMethod(MethodBuilder.createPutObject(fieldName, key, objectType));
+                    } else if (genericObjectType != null) {
+                        builder.addMethod(MethodBuilder.createGetGenericObject(fieldName, key, genericObjectType));
+                        builder.addMethod(MethodBuilder.createPutGenericObject(fieldName, key, genericObjectType));
+                    } else {
+                        builder.addMethod(MethodBuilder.createGetString(fieldName, key, defaultString));
+                        builder.addMethod(MethodBuilder.createPutString(fieldName, key));
                     }
                     break;
                 default:
