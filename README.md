@@ -40,17 +40,19 @@
 
 ```
 
-@SharePref(name = "pref", superPackage = "com.liudy.pref")
+@SharePref(name = "sample_pref")
 public class Pref {
 
-    @PrefKey(key = "token")
-    @DefaultString(value = "token123456789")
-    public String token;
+    @PrefKey(key = "user_name")
+    public String username;
 
-    @PrefKey(key = "user_info")
-    @ObjectType(value = "com.liudy.data.UserInfo")
-    public UserInfo userInfo;
-    
+    @PrefKey(key = "user")
+    @ObjectType
+    public User user;
+
+    @PrefKey(key = "user_list")
+    @ObjectType
+    public List<User> userList;
 }
 
 ```
@@ -67,7 +69,7 @@ public final class Pref_ extends Pref {
   private static Editor editor;
 
   private Pref_(Context context) {
-    preference = context.getSharedPreferences("pref",0);
+    preference = context.getSharedPreferences("sample_pref",0);
     editor = preference.edit();
   }
 
@@ -78,64 +80,96 @@ public final class Pref_ extends Pref {
     return instance;
   }
 
-  public void removeToken() {
+  public void removeUsername() {
     synchronized(Pref_.class) {
       if(editor != null) {
-        editor.remove("token").apply();
+        editor.remove("user_name").apply();
       }
     }
   }
 
-  public String getToken() {
+  public String getUsername() {
     synchronized(Pref_.class) {
       if(preference != null) {
-        return preference.getString("token", "token123456789");
+        return preference.getString("user_name", "");
       }
-      return "token123456789";
+      return "";
     }
   }
 
-  public void putToken(String value) {
+  public void putUsername(String value) {
     synchronized(Pref_.class) {
       if(editor != null && value != null) {
-        editor.putString("token", value).apply();
+        editor.putString("user_name", value).apply();
       }
     }
   }
 
-  public void removeUserInfo() {
+  public void removeUser() {
     synchronized(Pref_.class) {
       if(editor != null) {
-        editor.remove("user_info").apply();
+        editor.remove("user").apply();
       }
     }
   }
 
-  public UserInfo getUserInfo() {
+  public User getUser() {
     synchronized(Pref_.class) {
       if(preference != null) {
-        String json = preference.getString("user_info", "");
+        String json = preference.getString("user", "");
         if(json.isEmpty()) {
           return null;
         }
-        return new Gson().fromJson(json, UserInfo.class);
+        return new Gson().fromJson(json, User.class);
       }
       return null;
     }
   }
 
-  public void putUserInfo(UserInfo userinfo) {
+  public void putUser(User user) {
     synchronized(Pref_.class) {
       if(editor != null) {
         String json = "";
-        if(userinfo != null) {
-          json = new Gson().toJson(userinfo);
+        if(user != null) {
+          json = new Gson().toJson(user);
         }
-        editor.putString("user_info", json).apply();
+        editor.putString("user", json).apply();
       }
     }
   }
-}
+
+  public void removeUserList() {
+    synchronized(Pref_.class) {
+      if(editor != null) {
+        editor.remove("user_list").apply();
+      }
+    }
+  }
+
+  public List<User> getUserList() {
+    synchronized(Pref_.class) {
+      if(preference != null) {
+        String json = preference.getString("user_list", "");
+        if(json.isEmpty()) {
+          return null;
+        }
+        return new Gson().fromJson(json, new TypeToken<List<User>>() {}.getType());
+      }
+      return null;
+    }
+  }
+
+  public void putUserList(List<User> userlist) {
+    synchronized(Pref_.class) {
+      if(editor != null) {
+        String json = "";
+        if(userlist != null) {
+          json = new Gson().toJson(userlist);
+        }
+        editor.putString("user_list", json).apply();
+      }
+    }
+  }
 
 ```
 
