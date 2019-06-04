@@ -3,12 +3,24 @@
 
 [![](https://jitpack.io/v/liudingyi/PrefAnnotation.svg)](https://jitpack.io/#liudingyi/PrefAnnotation)
 
+### 1.在project中的build.gradle
 
-### Gralde导入
-```
-    implementation 'com.github.liudingyi.PrefAnnotation:annotations:lastversion'
-    annotationProcessor 'com.github.liudingyi.PrefAnnotation:processors:lastversion'
-```
+    allprojects {
+        repositories {
+            ...
+            //添加仓库路径
+            maven { url "https://jitpack.io" }
+        }
+    }
+
+### 2.在module中的build.gradle
+
+    dependencies {
+        ...
+        implementation 'com.github.liudingyi.PrefAnnotation:annotations:@version'
+        annotationProcessor 'com.github.liudingyi.PrefAnnotation:processors:@version'
+    }
+
 
 ### 注解说明
 
