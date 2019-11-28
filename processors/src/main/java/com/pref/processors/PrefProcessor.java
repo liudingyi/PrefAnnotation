@@ -10,7 +10,6 @@ import com.pref.annotations.PrefKey;
 import com.pref.annotations.SharePref;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
@@ -26,9 +25,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({
@@ -68,8 +64,6 @@ public class PrefProcessor extends AbstractProcessor {
                 } else {
                     throw new PreferenceProcessorsException("Preference name must be initialized.");
                 }
-//            } else {
-//                throw new PreferenceProcessorsException("The type of @SharePref annotation is empty.");
             }
         }
         TypeSpec.Builder builder = TypeSpec.classBuilder(MethodBuilder.PrefClassName);
