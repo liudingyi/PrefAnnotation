@@ -15,8 +15,9 @@ public class MethodBuilder {
     public static String PrefClassName = "Pref";
     public static final String PrefInstanceName = "instance";
     public static String PrefName = "pref_data";
+    public static final String context = "context";
 
-    private static final ClassName Context = ClassName.get("android.content", "Context");
+    public static final ClassName Context = ClassName.get("android.content", "Context");
     public static final ClassName SharedPreferences = ClassName.get("android.content", "SharedPreferences");
     public static final ClassName Editor = ClassName.get("android.content.SharedPreferences", "Editor");
 
@@ -39,6 +40,17 @@ public class MethodBuilder {
     /**
      * @return MethodSpec
      */
+    public static MethodSpec createInitialize() {
+        return MethodSpec.methodBuilder("initialize")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addParameter(Context, "mContext")
+                .addStatement("$N = mContext", context)
+                .build();
+    }
+
+    /**
+     * @return MethodSpec
+     */
     public static MethodSpec createConstructor() {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PRIVATE)
@@ -55,7 +67,7 @@ public class MethodBuilder {
         return MethodSpec.methodBuilder("getInstance")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ClassName.get(PrefPackageName, PrefClassName))
-                .addParameter(Context, "context")
+//                .addParameter(Context, "context")
                 .beginControlFlow("if($N == null)", PrefInstanceName)
                 .addStatement("$N = new $N(context)", PrefInstanceName, PrefClassName)
                 .endControlFlow()
