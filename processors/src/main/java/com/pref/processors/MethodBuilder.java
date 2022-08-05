@@ -7,6 +7,13 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.lang.model.element.Modifier;
 
 public class MethodBuilder {
@@ -332,7 +339,7 @@ public class MethodBuilder {
      * @return MethodSpec
      */
     public static MethodSpec createGetGenericObject(String fieldName, String key, String genericObjectType) {
-        int start = genericObjectType.lastIndexOf("<");
+        int start = genericObjectType.indexOf("<");
         int end = genericObjectType.lastIndexOf(">");
         //构建主类型
         String mainPackagePath = genericObjectType.substring(0, start);
@@ -342,11 +349,13 @@ public class MethodBuilder {
         ClassName mainClass = ClassName.get(mainPackageName, mainClassName);
         //构建泛型类型
         String innerPackagePath = genericObjectType.substring(start + 1, end);
-        int innerIndex = innerPackagePath.lastIndexOf(".");
-        String innerPackageName = innerPackagePath.substring(0, innerIndex);
-        String innerClassName = innerPackagePath.substring(innerIndex + 1);
-        ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
-        TypeName obj = ParameterizedTypeName.get(mainClass, innerClass);
+//        int innerIndex = innerPackagePath.lastIndexOf(".");
+//        String innerPackageName = innerPackagePath.substring(0, innerIndex);
+//        String innerClassName = innerPackagePath.substring(innerIndex + 1);
+//        ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
+//        ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, innerClass);
+        List<TypeName> list = getParameterizedTypeName(innerPackagePath);
+        ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, list.toArray(new TypeName[list.size()]));
         return MethodSpec.methodBuilder("get" + upperCase(fieldName))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(obj)
@@ -370,7 +379,7 @@ public class MethodBuilder {
      * @return MethodSpec
      */
     public static MethodSpec createPutGenericObject(String fieldName, String key, String genericObjectType) {
-        int start = genericObjectType.lastIndexOf("<");
+        int start = genericObjectType.indexOf("<");
         int end = genericObjectType.lastIndexOf(">");
         //构建主类型
         String mainPackagePath = genericObjectType.substring(0, start);
@@ -380,11 +389,13 @@ public class MethodBuilder {
         ClassName mainClass = ClassName.get(mainPackageName, mainClassName);
         //构建泛型类型
         String innerPackagePath = genericObjectType.substring(start + 1, end);
-        int innerIndex = innerPackagePath.lastIndexOf(".");
-        String innerPackageName = innerPackagePath.substring(0, innerIndex);
-        String innerClassName = innerPackagePath.substring(innerIndex + 1);
-        ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
-        ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, innerClass);
+//        int innerIndex = innerPackagePath.lastIndexOf(".");
+//        String innerPackageName = innerPackagePath.substring(0, innerIndex);
+//        String innerClassName = innerPackagePath.substring(innerIndex + 1);
+//        ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
+//        ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, innerClass);
+        List<TypeName> list = getParameterizedTypeName(innerPackagePath);
+        ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, list.toArray(new TypeName[list.size()]));
         return MethodSpec.methodBuilder("put" + upperCase(fieldName))
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(obj, fieldName.toLowerCase())
@@ -398,5 +409,40 @@ public class MethodBuilder {
                 .endControlFlow()
                 .endControlFlow()
                 .build();
+    }
+
+    /**
+     * 获取类型集合，目前只支持两成嵌套
+     */
+    public static List<TypeName> getParameterizedTypeName(String innerPackagePath) {
+        List<TypeName> list = new ArrayList<>();
+        String[] paths = innerPackagePath.split(",");
+        for (int i = 0; i < paths.length; i++) {
+            String path = paths[i];
+            if (path.contains("<")) {
+                int start = path.lastIndexOf("<");
+                int end = path.lastIndexOf(">");
+                String pPath = path.substring(0, start);
+                int index = pPath.lastIndexOf(".");
+                String packageName = pPath.substring(0, index);
+                String className = pPath.substring(index + 1);
+                ClassName mClass = ClassName.get(packageName, className);
+                //构建泛型类型
+                String innerPath = path.substring(start + 1, end);
+                int innerIndex = innerPath.lastIndexOf(".");
+                String innerPackageName = innerPath.substring(0, innerIndex);
+                String innerClassName = innerPath.substring(innerIndex + 1);
+                ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
+                ParameterizedTypeName obj = ParameterizedTypeName.get(mClass, innerClass);
+                list.add(obj);
+            } else {
+                int index = path.lastIndexOf(".");
+                String packageName = path.substring(0, index);
+                String className = path.substring(index + 1);
+                ClassName mClass = ClassName.get(packageName, className);
+                list.add(mClass);
+            }
+        }
+        return list;
     }
 }
