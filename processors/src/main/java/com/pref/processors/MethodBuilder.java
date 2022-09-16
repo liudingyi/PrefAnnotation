@@ -7,15 +7,16 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.lang.model.element.Modifier;
 
+/**
+ * @author： Liudy
+ * @description：
+ * @date： 2022-09-16
+ */
 public class MethodBuilder {
 
     public static final String PrefPackageName = "com.pref";
@@ -286,9 +287,9 @@ public class MethodBuilder {
      */
     public static MethodSpec createGetObject(String fieldName, String key, String objectType) {
         int index = objectType.lastIndexOf(".");
-        String package_name = objectType.substring(0, index);
-        String class_name = objectType.substring(index + 1);
-        ClassName obj = ClassName.get(package_name, class_name);
+        String packageName = objectType.substring(0, index);
+        String className = objectType.substring(index + 1);
+        ClassName obj = ClassName.get(packageName, className);
         return MethodSpec.methodBuilder("get" + upperCase(fieldName))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(obj)
@@ -313,17 +314,17 @@ public class MethodBuilder {
      */
     public static MethodSpec createPutObject(String fieldName, String key, String objectType) {
         int index = objectType.lastIndexOf(".");
-        String package_name = objectType.substring(0, index);
-        String class_name = objectType.substring(index + 1);
-        ClassName obj = ClassName.get(package_name, class_name);
+        String packageName = objectType.substring(0, index);
+        String className = objectType.substring(index + 1);
+        ClassName obj = ClassName.get(packageName, className);
         return MethodSpec.methodBuilder("put" + upperCase(fieldName))
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(obj, class_name.toLowerCase())
+                .addParameter(obj, className.toLowerCase())
                 .beginControlFlow("synchronized($N.class)", PrefClassName)
                 .beginControlFlow("if($N != null)", editor)
                 .addStatement("String json = \"\"")
-                .beginControlFlow("if($N != null)", class_name.toLowerCase())
-                .addStatement("json = new $T().toJson($N)", Gson.class, class_name.toLowerCase())
+                .beginControlFlow("if($N != null)", className.toLowerCase())
+                .addStatement("json = new $T().toJson($N)", Gson.class, className.toLowerCase())
                 .endControlFlow()
                 .addStatement("$N.putString($S, json).apply()", editor, key)
                 .endControlFlow()
@@ -406,8 +407,7 @@ public class MethodBuilder {
     public static List<TypeName> getParameterizedTypeName(String innerPackagePath) {
         List<TypeName> list = new ArrayList<>();
         String[] paths = innerPackagePath.split(",");
-        for (int i = 0; i < paths.length; i++) {
-            String path = paths[i];
+        for (String path : paths) {
             if (path.contains("<")) {
                 int start = path.lastIndexOf("<");
                 int end = path.lastIndexOf(">");

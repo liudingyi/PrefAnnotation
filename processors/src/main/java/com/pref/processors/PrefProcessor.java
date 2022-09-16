@@ -26,6 +26,11 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
+/**
+ * @author： Liudy
+ * @description：
+ * @date： 2022-09-16
+ */
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({
         "com.pref.annotations.SharePref",
