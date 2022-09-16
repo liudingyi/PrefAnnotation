@@ -74,7 +74,6 @@ public class MethodBuilder {
         return MethodSpec.methodBuilder("getInstance")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ClassName.get(PrefPackageName, PrefClassName))
-//                .addParameter(Context, "context")
                 .beginControlFlow("if($N == null)", PrefInstanceName)
                 .addStatement("$N = new $N(context)", PrefInstanceName, PrefClassName)
                 .endControlFlow()
@@ -349,11 +348,6 @@ public class MethodBuilder {
         ClassName mainClass = ClassName.get(mainPackageName, mainClassName);
         //构建泛型类型
         String innerPackagePath = genericObjectType.substring(start + 1, end);
-//        int innerIndex = innerPackagePath.lastIndexOf(".");
-//        String innerPackageName = innerPackagePath.substring(0, innerIndex);
-//        String innerClassName = innerPackagePath.substring(innerIndex + 1);
-//        ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
-//        ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, innerClass);
         List<TypeName> list = getParameterizedTypeName(innerPackagePath);
         ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, list.toArray(new TypeName[list.size()]));
         return MethodSpec.methodBuilder("get" + upperCase(fieldName))
@@ -389,11 +383,6 @@ public class MethodBuilder {
         ClassName mainClass = ClassName.get(mainPackageName, mainClassName);
         //构建泛型类型
         String innerPackagePath = genericObjectType.substring(start + 1, end);
-//        int innerIndex = innerPackagePath.lastIndexOf(".");
-//        String innerPackageName = innerPackagePath.substring(0, innerIndex);
-//        String innerClassName = innerPackagePath.substring(innerIndex + 1);
-//        ClassName innerClass = ClassName.get(innerPackageName, innerClassName);
-//        ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, innerClass);
         List<TypeName> list = getParameterizedTypeName(innerPackagePath);
         ParameterizedTypeName obj = ParameterizedTypeName.get(mainClass, list.toArray(new TypeName[list.size()]));
         return MethodSpec.methodBuilder("put" + upperCase(fieldName))
