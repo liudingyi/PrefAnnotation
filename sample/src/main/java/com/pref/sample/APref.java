@@ -8,11 +8,11 @@ import com.pref.sample.data.User;
 import java.util.List;
 import java.util.Map;
 
-@SharePref(name = "sample_pref", enable = false)
-public class Pref {
+@SharePref(name = "sample_pref_a")
+public class APref {
 
-    @PrefKey(key = "user_name")
-    public String username;
+//    @PrefKey(key = "user_name")
+//    public String username;
 //
 //    @PrefKey(key = "user")
 //    @ObjectType
@@ -22,9 +22,9 @@ public class Pref {
 //    @ObjectType
 //    public List<User> userList;
 
-//    @PrefKey(key = "user_map")
-//    @ObjectType
-//    public Map<List<User>, List<User>> userMap;
+    @PrefKey(key = "user_map")
+    @ObjectType
+    public Map<List<User>, List<User>> userMap;
 //    public Map<String, User> userMap;
 
 }
