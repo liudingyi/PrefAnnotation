@@ -8,11 +8,14 @@ import com.pref.sample.data.User;
 import java.util.List;
 import java.util.Map;
 
-@SharePref(name = "sample_pref", enable = false)
+@SharePref(name = "sample_pref", enable = true)
 public class Pref {
 
     @PrefKey(key = "user_name")
     public String username;
+
+    @PrefKey(key = "user_phone", enable = true)
+    public String userPhone;
 //
 //    @PrefKey(key = "user")
 //    @ObjectType

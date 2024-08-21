@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface PrefKey {
     String key() default "";
+
+    boolean enable() default true;
 }

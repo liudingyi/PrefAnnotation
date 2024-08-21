@@ -89,13 +89,17 @@ public class PrefProcessor extends AbstractProcessor {
                         .addMethod(MethodBuilder.createConstructor())
                         .addMethod(MethodBuilder.createInstance());
                 for (Element element : roundEnvironment.getElementsAnnotatedWith(PrefKey.class)) {
+                    PrefKey prefKey = element.getAnnotation(PrefKey.class);
+                    if (!prefKey.enable()) {
+                        continue;
+                    }
                     TypeElement typeElement = (TypeElement) element.getEnclosingElement();
                     String tempClassNameString = typeElement.getQualifiedName().toString();
                     if (!classNameString.equals(tempClassNameString)) {
                         continue;
                     }
                     String fieldName = element.getSimpleName().toString();
-                    String key = element.getAnnotation(PrefKey.class).key();
+                    String key = prefKey.key();
                     key = key.isEmpty() ? fieldName.toLowerCase() : key;
                     builder.addMethod(MethodBuilder.createRemove(fieldName, key));
                     switch (element.asType().getKind()) {
