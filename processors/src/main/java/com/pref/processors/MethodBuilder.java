@@ -51,8 +51,10 @@ public class MethodBuilder {
     public static MethodSpec createInitialize() {
         return MethodSpec.methodBuilder("initialize")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addParameter(Context, "mContext")
-                .addStatement("$N = mContext", context)
+                .addParameter(Context, "context")
+                .beginControlFlow("if($N == null)", PrefInstanceName)
+                .addStatement("$N = new $N(context)", PrefInstanceName, PrefClassName)
+                .endControlFlow()
                 .build();
     }
 
@@ -75,9 +77,6 @@ public class MethodBuilder {
         return MethodSpec.methodBuilder("getInstance")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ClassName.get(PrefPackageName, PrefClassName))
-                .beginControlFlow("if($N == null)", PrefInstanceName)
-                .addStatement("$N = new $N(context)", PrefInstanceName, PrefClassName)
-                .endControlFlow()
                 .addStatement("return $N", PrefInstanceName)
                 .build();
     }

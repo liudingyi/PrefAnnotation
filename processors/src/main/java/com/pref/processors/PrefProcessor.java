@@ -82,9 +82,8 @@ public class PrefProcessor extends AbstractProcessor {
                 }
                 builder.addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                         .addField(ClassName.get(MethodBuilder.PrefPackageName, MethodBuilder.PrefClassName), MethodBuilder.PrefInstanceName, Modifier.PRIVATE, Modifier.STATIC)
-                        .addField(MethodBuilder.SharedPreferences, MethodBuilder.preference, Modifier.PRIVATE, Modifier.STATIC)
-                        .addField(MethodBuilder.Editor, MethodBuilder.editor, Modifier.PRIVATE, Modifier.STATIC)
-                        .addField(MethodBuilder.Context, MethodBuilder.context, Modifier.PRIVATE, Modifier.STATIC)
+                        .addField(MethodBuilder.SharedPreferences, MethodBuilder.preference, Modifier.PRIVATE)
+                        .addField(MethodBuilder.Editor, MethodBuilder.editor, Modifier.PRIVATE)
                         .addMethod(MethodBuilder.createInitialize())
                         .addMethod(MethodBuilder.createConstructor())
                         .addMethod(MethodBuilder.createInstance());
